@@ -74,7 +74,7 @@ app.post('/api/products', (req, res) => {
       message: 'Body of request must contain a "name" of type "string" and a "id" of type "String"',
     });
   } else {
-      console.log(req.product)
+      //console.log(req.product)
       req.product.push(req.body)
     // const newProduct = {
     //   ...req.product,
@@ -97,17 +97,17 @@ app.post('/api/products', (req, res) => {
 app.delete('/api/products/:id', (req, res) => {
   const { id } = req.params;
   console.log("id ",id)
-  console.log("params ",req.params);
-  console.log("products ",req.product)
+ // console.log("params ",req.params);
+ // console.log("products ",req.product)
  const exists = req.product.find(product => product.id == id)
-console.log("exists ",exists)
+//console.log("exists ",exists)
 
   if(!exists){  //(!req.product[id]) {
     res.status(400).send({
       message: `Product ${id} does not exist!`,
     });
   } else {
-    console.log("before delete ",req.product)
+    //console.log("before delete ",req.product)
      let arr =  req.product.filter(product => product.id != id)
   //  delete req.product[id];
     console.log("after delete ",arr)
@@ -115,7 +115,7 @@ console.log("exists ",exists)
       .then(() => {
         res.send({
           message: `Product ${id} removed!`,
-          data:arr,
+          updatedProducts:arr,
         });
       });
   }
