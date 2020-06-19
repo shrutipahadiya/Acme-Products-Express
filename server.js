@@ -88,6 +88,7 @@ app.post('/api/products', (req, res) => {
       .then(() => {
         res.send({
           message: `product ${id} added !`,
+          id:id,
         });
       });
   }
@@ -114,6 +115,7 @@ console.log("exists ",exists)
       .then(() => {
         res.send({
           message: `Product ${id} removed!`,
+          data:arr,
         });
       });
   }

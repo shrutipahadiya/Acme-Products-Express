@@ -8,30 +8,198 @@
     <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/react-router-dom/5.0.0/react-router-dom.js'></script>
+    <style>
+      body {
+        font-family: verdana;
+      }
+      nav {
+        display: flex;
+        justify-content: space-around;
+      }
+      
+      .selected {
+        background-color: dodgerblue;
+        color: white;
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+      }
+      
+      input, button {
+        height: 2rem;
+        font-size: 1rem;
+      }
+
+      hr {
+        border: dodgerblue 1px solid;
+      }
+
+
+      li{
+        list-style:none;
+      }
+      </style>
   </head>
   <body>
     <div id='root'></div>
     <script type='text/babel'>
-
-      class App extends React.component{
-        constrcutor(){
+      //const { render } = ReactDOM;
+      //const { Component } = React;
+      const { HashRouter, Route, Link, Switch, Redirect } = ReactRouterDOM;
+    
+      class Home extends React.Component{
+        constructor(){
           super();
-          this.state={
-            data:0
-          }
         }
         render(){
-          return <hr/>
-        }
-
-        componentDidMount(){
-          axios.get('/api/data')
-                .then(response => response.data)
+          return (
+           <div> <h1>Home</h1></div>
+          )
         }
       }
 
+
+      class Products extends React.Component{
+        constructor(){
+          super();
+          // this.state={
+          //   products:this.props.products
+          // }
+        
+        }
+        render(){ 
+          const {products} = this.props;
+          console.log("data is == ",products);
+          return (
+        <div>
+          <h1>Products</h1>
+          <hr/>
+          <ul>{
+           
+             products.map((product,id) =>{
+               console.log("id is ",product.id)
+               console.log("name is ",product.name)
+             return <li key={product.id}>{product.name}
+              &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+              <button onClick={
+                (ev) =>{
+                  axios.delete(`http://localhost:3000/api/products/${product.id}`)
+                       .then((res) => {
+                         console.log("res in delete is ",res.data)
+                         console.log('Product with {product.id} has been deleted')
+                         this.setState({products:res.data})
+                         
+                      })
+                }
+               }>Destroy</button>
+               <hr/>
+              </li>
+             
+             })
+          }
+            </ul>
+        </div>
+        )
+       }
+      }
+
+     class CreateProduct extends React.Component{
+        constructor(){
+          super();
+          this.state={
+            name:''
+          }
+        }
+       render(){ 
+         const {name} = this.state;
+         console.log("name in create is --> ",name)
+         return (
+        <div>
+          <h1>Create A Product</h1>
+          <input onChange={
+            (ev) => {
+              this.setState({name:ev.target.value})
+            } }></input><br/><br/>
+            <button onClick={
+              (ev) => {
+                axios.post('http://localhost:3000/api/products',{name:name,id:Math.floor(Math.random() * 1000) + 1})
+                .then((res) => {
+                  console.log(`Product with Id ${res.data.id} has been added`)
+                  //console.log(res)
+              
+              })
+              }
+
+            }>Save</button>
+
+          </div>
+        )
+       }
+      }
+
+      const Nav = ({ path, products })=> {
+       console.log("path is ",path)
+       console.log("products is ",products)
+       console.log("products length is ",products.length)
+        return (
+          <nav>
+            <Link to='/home' className={ path === '/home' ? 'selected': ''}>Home</Link>
+            <Link to='/products' className={ path === '/products' ? 'selected': ''}>Products({products.length})</Link>
+            <Link to='/create' className={ path === '/create' ? 'selected': ''}>Create A Product</Link>
+          </nav>
+        );
+      };
+
+      class App extends React.Component{
+        constructor(){
+          super();
+          this.state={
+            products:[]
+          }
+        }
+      
+
+        componentDidMount(){
+          console.log("componentDidMount is called ---")
+          axios.get('http://localhost:3000/api/products')
+                .then(response => {
+                  console.log("response ",response)
+                  console.log("response data " ,response.data)
+                  this.setState({products:response.data.product})
+              
+                
+                })
+        }
+
+        render(){
+         const {products} = this.state;
+         console.log("products ---> " ,products);
+          return(
+            <div>
+              <h1>
+                Acme Products
+                </h1>
+                <HashRouter>
+                  <Route render={ ({ location } )=> <Nav path={ location.pathname } products={products} />} />
+                   <Switch> 
+                    <Route path="/home" render={ ()=> <Home />}/>
+                      <Route path="/products" render={ ()=> <Products products={ products}/> } />
+                        <Route path="/create" render={ ()=>  <CreateProduct/>} />
+                          
+                    </Switch>
+
+                  </HashRouter>
+
+                </div>
+          )
+        }
+
+
+      }
+
       const root = document.querySelector('#root');
-      ReactDOM.render(<App />, root);
+      ReactDOM.render(<App />, root, () => {
+    console.log('App has rendered!');
+     },);
     </script>
   </body>
 </html>
