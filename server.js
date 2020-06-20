@@ -62,8 +62,7 @@ app.get('/api/products', (req, res) => {
 });
 
 app.post('/api/products', (req, res) => {
- // const { id } = req.params;
-  const {id, name } = req.body;
+ const {id, name } = req.body;
 
   if (req.product[id]) {
     res.status(400).send({
@@ -74,7 +73,7 @@ app.post('/api/products', (req, res) => {
       message: 'Body of request must contain a "name" of type "string" and a "id" of type "String"',
     });
   } else {
-      //console.log(req.product)
+     // console.log("before post product == ",req.product)
       req.product.push(req.body)
     // const newProduct = {
     //   ...req.product,
@@ -83,12 +82,13 @@ app.post('/api/products', (req, res) => {
     // //     name,
     // //    },
     // };
-
+    //console.log("after post product == ",req.product)
     writeFileP(DB_PATH, req.product)
       .then(() => {
         res.send({
           message: `product ${id} added !`,
           id:id,
+          updatedProducts: req.product
         });
       });
   }
@@ -96,7 +96,7 @@ app.post('/api/products', (req, res) => {
 
 app.delete('/api/products/:id', (req, res) => {
   const { id } = req.params;
-  console.log("id ",id)
+  //console.log("id ",id)
  // console.log("params ",req.params);
  // console.log("products ",req.product)
  const exists = req.product.find(product => product.id == id)
@@ -110,10 +110,10 @@ app.delete('/api/products/:id', (req, res) => {
     //console.log("before delete ",req.product)
      let arr =  req.product.filter(product => product.id != id)
   //  delete req.product[id];
-    console.log("after delete ",arr)
+    //console.log("after delete ",arr)
     writeFileP(DB_PATH, arr)
       .then(() => {
-        res.send({
+       res.send({
           message: `Product ${id} removed!`,
           updatedProducts:arr,
         });

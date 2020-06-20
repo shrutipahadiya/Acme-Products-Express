@@ -15,6 +15,7 @@
       nav {
         display: flex;
         justify-content: space-around;
+        
       }
       
       .selected {
@@ -23,10 +24,20 @@
         padding: 0.5rem;
         border-radius: 0.25rem;
       }
+
+      .noselected {
+        color: dodgerblue;
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+        border: 1px solid;
+      }
+
       
       input, button {
         height: 2rem;
         font-size: 1rem;
+        width:70%;
+        margin:30px;
       }
 
       hr {
@@ -36,39 +47,59 @@
 
       li{
         list-style:none;
+        justify-content: space-between;
+        
       }
+
+       #deleteBtn{
+        width:70px;
+          
+      } 
+
+     /* .destroyBtn{
+        display:flex;
+        justify-content:flex-end; 
+         width:100%; 
+         padding:0;
+         position: absolute; 
+         right: 0;
+         text-align:right;
+         float:right;
+         clear: both;
+      } */
+
+      .box{
+        border-radius: 5px;
+        border-color: dodgerblue;
+        width:50%;
+        height:50%;
+        padding: 20px;
+        border: 1px solid dodgerblue;
+        align-items: center;
+        align-self: center;
+        
+    }
+
       </style>
   </head>
   <body>
     <div id='root'></div>
     <script type='text/babel'>
-      //const { render } = ReactDOM;
-      //const { Component } = React;
-      const { HashRouter, Route, Link, Switch, Redirect } = ReactRouterDOM;
+     const { HashRouter, Route, Link, Switch, Redirect } = ReactRouterDOM;
     
-      class Home extends React.Component{
-        constructor(){
-          super();
-        }
-        render(){
-          return (
+      const Home = () => {
+        return (
            <div> <h1>Home</h1></div>
           )
-        }
       }
 
 
       class Products extends React.Component{
-        constructor(){
-          super();
-          this.state={
-            products:this.props
-          }
-        
-        }
-        render(){ 
-          const {products} = this.props;
-         // console.log("data is == ",products);
+       render(){ 
+          const {products,deleteProduct } = this.props;
+         // console.log("products ",products);
+        // if(products && products.length){
+      // console.log("data is == ",products);
           return (
         <div>
           <h1>Products</h1>
@@ -76,32 +107,39 @@
           <ul>{
            
              products.map((product,id) =>{
-               //console.log("id is ",product.id)
-              // console.log("name is ",product.name)
-             return <li key={product.id}>{product.name}
-              &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-              <button onClick={
+              return <div > <li key={product.id}>{product.name}
+             
+              <button id="deleteBtn" onClick={
                 (ev) =>{
-                  axios.delete(`http://localhost:3000/api/products/${product.id}`)
-                       .then((res) => {
-                         console.log("res in delete is ",res.data)
-                         console.log("res data of data ",res.data.updatedProducts)
-                         console.log(`Product with Id ${product.id} has been deleted`)
-                         this.setState({products:res.data.updatedProducts})
+                 ev.preventDefault();
+                 deleteProduct(product.id);
+                      //  .then((res) => {
+                      //    console.log("res in delete is ",res.data)
+                      //    console.log("res data of data ",res.data.updatedProducts)
+                      //    console.log(`Product with Id ${product.id} has been deleted`)
+                      //   // this.setState({products:res.data.updatedProducts})
+                      //    console.log("state is ",this.state);
                          
-                      })
+                      // })
                 }
                }>Destroy</button>
+             
                <hr/>
               </li>
-             
+            </div>
              })
           }
             </ul>
         </div>
         )
+      // }else{
+      //   return (null)
+      // }
        }
       }
+      
+       
+      
 
      class CreateProduct extends React.Component{
         constructor(){
@@ -111,27 +149,29 @@
           }
         }
        render(){ 
-         const {name} = this.state;
-         console.log("name in create is --> ",name)
-         return (
+         const {products,createProduct} = this.props;
+        return (
         <div>
           <h1>Create A Product</h1>
-          <input onChange={
+          <div className={'box'}>
+          <input value={this.state.name} onChange={
             (ev) => {
-              this.setState({name:ev.target.value})
-            } }></input><br/><br/>
+            this.setState({name:ev.target.value})
+            } }  ></input><br/><br/>
             <button onClick={
               (ev) => {
-                axios.post('http://localhost:3000/api/products',{name:name,id:Math.floor(Math.random() * 1000) + 1})
-                .then((res) => {
-                  console.log(`Product with Id ${res.data.id} has been added`)
+               ev.preventDefault();
+                createProduct(this.state.name);
+                // axios.post('http://localhost:3000/api/products',{name:name,id:Math.floor(Math.random() * 1000) + 1})
+                // .then((res) => {
+                //   console.log(`Product with Id ${res.data.id} has been added`)
                   //console.log(res)
               
-              })
+            //  })
               }
 
             }>Save</button>
-
+</div>
           </div>
         )
        }
@@ -143,9 +183,9 @@
       // console.log("products length is ",products.length)
         return (
           <nav>
-            <Link to='/home' className={ path === '/home' ? 'selected': ''}>Home</Link>
-            <Link to='/products' className={ path === '/products' ? 'selected': ''}>Products({products.length})</Link>
-            <Link to='/create' className={ path === '/create' ? 'selected': ''}>Create A Product</Link>
+            <Link to='/home' className={ path === '/home' ? 'selected': 'noselected'}>Home</Link>
+            <Link to='/products' className={ path === '/products' ? 'selected': 'noselected'}>{`Products(${products.length})`}</Link>
+            <Link to='/create' className={ path === '/create' ? 'selected': 'noselected'}>Create A Product</Link>
           </nav>
         );
       };
@@ -166,14 +206,50 @@
                  // console.log("response ",response)
                  // console.log("response data " ,response.data)
                   this.setState({products:response.data.product})
-              
-                
-                })
+                      })
         }
+
+
+
+
+
+        deleteProduct(productId){
+         // console.log("productId is ", productId);
+          axios.delete(`http://localhost:3000/api/products/${productId}`)
+                       .then((res) => {
+                        //  console.log("res is ",res);
+                        //  console.log("res in delete is ",res.data)
+                        //  console.log("res data of data ",res.data.updatedProducts)
+                        //  console.log(`Product with Id ${productId} has been deleted`)
+                        this.setState({products:res.data.updatedProducts})
+                         
+                      })
+        }
+
+
+        createProduct(name){
+         // console.log("name in post is ", name)
+          axios.post('http://localhost:3000/api/products',{name:name,id:Math.floor(Math.random() * 1000) + 1})
+                .then((res) => {
+                 // console.log("res in post is === ",res)
+                  //console.log(`Product with Id ${res.data.id} has been added`)
+                  this.setState({products:res.data.updatedProducts})
+                  //console.log(res)
+              
+              })
+              window.location.hash = 'products';
+        }
+
+
+
+
+
+
 
         render(){
          const {products} = this.state;
-       //  console.log("products ---> " ,products);
+        //console.log("products ---> " ,products);
+         //console.log("this state ---> " ,this.state);
           return(
             <div>
               <h1>
@@ -183,8 +259,8 @@
                   <Route render={ ({ location } )=> <Nav path={ location.pathname } products={products} />} />
                    <Switch> 
                     <Route path="/home" render={ ()=> <Home />}/>
-                      <Route path="/products" render={ ()=> <Products products={ products}/> } />
-                        <Route path="/create" render={ ()=>  <CreateProduct/>} />
+                      <Route path="/products" render={ ()=> <Products products={ products} deleteProduct={(id) => this.deleteProduct(id)}/> }/>
+                        <Route path="/create" render={ ()=>  <CreateProduct products={ products} createProduct={(name) => this.createProduct(name)}/> }/>
                           
                     </Switch>
 
